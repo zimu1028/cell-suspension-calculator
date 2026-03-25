@@ -148,7 +148,7 @@
 <body>
     <div class="container">
         <div class="card">
-            <h2>🐬 细胞悬液接种&稀释方案计算器</h2>
+            <h2>🧫 细胞悬液接种&稀释一体化计算器</h2>
 
             <!-- 接种基础参数 -->
             <div class="item">
@@ -163,7 +163,11 @@
             <div class="item">
                 <label>需要接种的孔数</label>
                 <input type="number" id="well_count" placeholder="例如：24、48、96" value="24">
-                <div class="tip">目标总体积 = 每孔体积 × (孔数+2)（+2为预留余量）</div>
+            </div>
+            <div class="item">
+                <label>预留余量孔数</label>
+                <input type="number" id="extra_well" placeholder="默认4" value="4">
+                <div class="tip">目标总体积 = 每孔体积 × (孔数 + 预留孔数)</div>
             </div>
 
             <!-- 原浓度参数 -->
@@ -191,6 +195,7 @@ function calcAll() {
     let cell_per_well = parseFloat(document.getElementById('cell_per_well').value);
     let inoculate_vol = parseFloat(document.getElementById('inoculate_vol').value) || 80;
     let well_count = parseFloat(document.getElementById('well_count').value) || 24;
+    let extra_well = parseFloat(document.getElementById('extra_well').value) || 4;
     let c1_num = parseFloat(document.getElementById('c1_num').value);
     let c1_unit = parseFloat(document.getElementById('c1_unit').value);
 
@@ -207,6 +212,10 @@ function calcAll() {
         alert('请输入有效的接种孔数');
         return;
     }
+    if (isNaN(extra_well) || extra_well < 0) {
+        alert('请输入有效的预留孔数（≥0）');
+        return;
+    }
     if (isNaN(c1_num) || c1_num <= 0) {
         alert('请输入有效的原细胞浓度数值');
         return;
@@ -215,8 +224,8 @@ function calcAll() {
     // 3. 计算核心参数
     // 3.1 所需悬液浓度
     let need_conc = (cell_per_well / inoculate_vol) * 1000;
-    // 3.2 目标总体积（每孔体积 × (孔数+2)）
-    let v_total = inoculate_vol * (well_count + 2);
+    // 3.2 目标总体积（每孔体积 × (孔数+预留量)）
+    let v_total = inoculate_vol * (well_count + extra_well);
     // 3.3 原浓度真实值
     let c1_real = c1_num * c1_unit;
     // 3.4 原液体积和培养基体积
@@ -230,7 +239,8 @@ function calcAll() {
         <b>📋 接种参数</b><br>
         每孔细胞数：${cell_per_well.toLocaleString()} 个<br>
         每孔接种体积：${inoculate_vol} μL<br>
-        接种孔数：${well_count} 孔（+2孔余量）<br>
+        接种孔数：${well_count} 孔<br>
+        预留余量：${extra_well} 孔<br>
         👉 需配置悬液浓度：<b>${need_conc.toLocaleString()} cells/mL</b><br>
         👉 目标总体积：<b>${v_total} μL</b><br>
         <br>
